@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UniRx;
 using UniRx.Triggers;
+using DG.Tweening;
 
 public class NotesController : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class NotesController : MonoBehaviour
     private readonly int m_fontMax = 3;
     private DoorController[] m_doorList = null;
     private FontController[] m_fontList = null;
+    private int m_index = 0;
+
+    public int Index => m_index;
 
     private void Awake()
     {
@@ -62,17 +66,73 @@ public class NotesController : MonoBehaviour
         });
     }
 
-    public void Ready(int index)
+    public bool IsHide()
     {
-        gameObject.SetActive(true);
-        m_doorList[0].Ready(index);
+        return !gameObject.activeSelf;
     }
 
-    public void Play(int index)
+    public bool IsReady()
     {
-        m_doorList[0].Play(() =>
+        return m_doorList[0].IsReady(m_index);
+    }
+
+    public void Ready(int index)
+    {
+        Vector3 pos = transform.localPosition;
+        pos.z = 30.0f;
+        transform.localPosition = pos;
+
+        gameObject.SetActive(true);
+        m_doorList[0].Ready(index);
+        m_index = index;
+    }
+
+    public bool IsStartMove()
+    {
+        Vector3 pos = transform.localPosition;
+        return pos.z < 30.0f && pos.z > 0.0f;
+    }
+
+    public void StartMove(float time)
+    {
+        transform.DOLocalMoveZ(0.0f, time).SetEase(Ease.OutQuad);
+    }
+
+    public bool IsEndMove()
+    {
+        Vector3 pos = transform.localPosition;
+        return pos.z < 0.0f;
+    }
+
+    public void EndMove(float time)
+    {
+        Vector3 pos = transform.localPosition;
+        pos.z = -0.01f;
+        transform.localPosition = pos;
+        transform.DOLocalMoveZ(-10.0f, time).SetEase(Ease.OutQuad).OnComplete(() =>
         {
-            m_fontList[0].Play(index);
+            gameObject.SetActive(false);
         });
+    }
+
+    public bool IsStandBy()
+    {
+        return IsReady() && transform.localPosition.z < 0.01f;
+    }
+
+    public bool IsPlay()
+    {
+        return m_doorList[0].IsPlay(m_index);
+    }
+
+    public void Play()
+    {
+        m_doorList[0].Play(null);
+        m_fontList[0].Play(m_index);
+    }
+
+    public bool IsOpen()
+    {
+        return m_doorList[0].IsOpen() && !IsEndMove() && !IsHide();
     }
 }

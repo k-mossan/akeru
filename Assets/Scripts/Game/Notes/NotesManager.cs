@@ -13,6 +13,8 @@ public class NotesManager : MonoBehaviour
     private readonly int m_notesMax = 3;
     private NotesController[] m_notesList = null;
 
+    public NotesController[] NotesList => m_notesList;
+
     private void Awake()
     {
         m_notesList = new NotesController[m_notesMax];
@@ -35,6 +37,6 @@ public class NotesManager : MonoBehaviour
     public void Play(int index)
     {
         m_notesList[0].Ready(index);
-        m_notesList[0].Play(index);
+        m_notesList[0].Play();
     }
 }

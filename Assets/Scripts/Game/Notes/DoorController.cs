@@ -10,6 +10,11 @@ public class DoorController : MonoBehaviour
     private Animator m_animator = null;
 
     private readonly int m_openHash = Animator.StringToHash("Open");
+    private readonly int[] m_openHashs =
+    {
+        Animator.StringToHash("Open00"),
+        Animator.StringToHash("Open01"),
+    };
     private readonly int[] m_closeHashs =
     {
         Animator.StringToHash("Close00"),
@@ -22,10 +27,20 @@ public class DoorController : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    public bool IsReady(int index)
+    {
+        return m_animator.GetCurrentAnimatorStateInfo(0).shortNameHash == m_closeHashs[index];
+    }
+
     public void Ready(int index)
     {
         gameObject.SetActive(true);
         m_animator.SetTrigger(m_closeHashs[index]);
+    }
+
+    public bool IsPlay(int index)
+    {
+        return m_animator.GetCurrentAnimatorStateInfo(0).shortNameHash == m_openHashs[index];
     }
 
     public void Play(System.Action callback)
@@ -45,5 +60,10 @@ public class DoorController : MonoBehaviour
                 }
             });
         });
+    }
+
+    public bool IsOpen()
+    {
+        return m_animator.GetCurrentAnimatorStateInfo(0).shortNameHash == m_openHash;
     }
 }
