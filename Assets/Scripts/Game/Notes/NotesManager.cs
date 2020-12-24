@@ -77,6 +77,11 @@ public class NotesManager : MonoBehaviour
         openNotes.Play();
     }
 
+    public bool Opening()
+    {
+        return m_notesList.Any(v => v.IsPlay());
+    }
+
     public bool IsOpen()
     {
         return m_notesList.Any(v => v.IsOpen());
@@ -84,7 +89,7 @@ public class NotesManager : MonoBehaviour
 
     public void Play(float time, System.Action destroyCallbak)
     {
-        NotesController openNotes = m_notesList.FirstOrDefault(v => v.IsOpen());
+        NotesController openNotes = m_notesList.FirstOrDefault(v => v.IsPlay() || v.IsOpen());
         if (openNotes)
         {
             var disposable = new SingleAssignmentDisposable();

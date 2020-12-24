@@ -21,6 +21,7 @@ public class StageController : MonoBehaviour
 
     private NotesManager m_notesManager = null;
     private TempoManager m_tempoManager = null;
+    private int m_openCount = 0;
 
     private void Awake()
     {
@@ -50,12 +51,9 @@ public class StageController : MonoBehaviour
                 int prevCounter = m_tempoManager.TanCounter;
                 this.UpdateAsObservable().Where(a => m_tempoManager.TanCounter > prevCounter).Subscribe(b =>
                 {
-                    if (m_notesManager.IsOpen())
+                    if (m_notesManager.Opening() || m_notesManager.IsOpen())
                     {
-                        m_notesManager.Play(m_tempoManager.TempoTime, () =>
-                        {
-                            ReadyNotes();
-                        });
+                        PlayNotes();
                     }
                     prevCounter = m_tempoManager.TanCounter;
                 });
@@ -74,8 +72,26 @@ public class StageController : MonoBehaviour
             disposable.Disposable = this.UpdateAsObservable().Where(b => Input.GetKeyDown(KeyCode.A)).Subscribe(b =>
             {
                 m_notesManager.Open();
+                m_openCount = m_tempoManager.Counter % 4;
                 disposable.Dispose();
             });
+        });
+    }
+
+    private void PlayNotes()
+    {
+        var disposable = new SingleAssignmentDisposable();
+        disposable.Disposable = this.UpdateAsObservable().Where(
+            a => (m_openCount == 0 && (m_tempoManager.Counter % 4) == 3)
+            || (m_openCount == 1 && (m_tempoManager.Counter % 4) == 3)
+            || (m_openCount == 2 && (m_tempoManager.Counter % 4) == 1)
+            || (m_openCount == 3 && (m_tempoManager.Counter % 4) == 1)).Subscribe(a =>
+        {
+            m_notesManager.Play(m_tempoManager.TempoTime, () =>
+            {
+                ReadyNotes();
+            });
+            disposable.Dispose();
         });
     }
 }
