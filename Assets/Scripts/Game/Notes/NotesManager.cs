@@ -14,6 +14,7 @@ public class NotesManager : MonoBehaviour
     private Transform m_notesRoot = null;
 
     private readonly int m_notesMax = 3;
+    private readonly int m_randMax = 2;
     private List<NotesController> m_notesList = new List<NotesController>();
 
     public List<NotesController> NotesList => m_notesList;
@@ -47,8 +48,8 @@ public class NotesManager : MonoBehaviour
     public void Ready(float moveTime, System.Action callback)
     {
         gameObject.SetActive(true);
-        m_notesList[0].Ready(Random.Range(0, 2));
-        m_notesList[1].Ready(Random.Range(0, 2));
+        m_notesList[0].Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max));
+        m_notesList[1].Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max));
         var firstDisposable = new SingleAssignmentDisposable();
         firstDisposable.Disposable = this.UpdateAsObservable().Where(_ => m_notesList[0].IsReady()).Subscribe(_ =>
         {
@@ -117,11 +118,30 @@ public class NotesManager : MonoBehaviour
                 disposable = new SingleAssignmentDisposable();
                 disposable.Disposable = this.UpdateAsObservable().Where(b => newNotes.IsHide()).Subscribe(b =>
                 {
-                    newNotes.Ready(Random.Range(0, 2));
+                    newNotes.Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max));
                     disposable.Dispose();
                 });
             });
             readyNotes.StartMove(time);
+        }
+    }
+
+    public bool IsPhoneHit(Vector3 vec)
+    {
+        NotesController notes = m_notesList.FirstOrDefault(v => v.IsStandBy());
+        if (notes)
+        {
+            return notes.IsPhoneHit(vec);
+        }
+        return false;
+    }
+
+    public void PlayPhone()
+    {
+        NotesController notes = m_notesList.FirstOrDefault(v => v.IsStandBy());
+        if (notes)
+        {
+            notes.PlayPhone();
         }
     }
 }

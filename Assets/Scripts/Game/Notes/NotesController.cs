@@ -20,11 +20,26 @@ public class NotesController : MonoBehaviour
     [SerializeField]
     private Transform m_fontRoot = null;
 
+    [SerializeField]
+    private GameObject m_phonePrefab = null;
+
+    [SerializeField]
+    private Transform m_phoneRoot = null;
+
     public readonly float m_maxZ = 50;
     private readonly int m_doorMax = 3;
     private readonly int m_fontMax = 3;
+    private readonly int[] m_fontIndexes =
+    {
+        0,
+        1,
+        0,
+        1
+    };
+
     private DoorController[] m_doorList = null;
     private FontController[] m_fontList = null;
+    private PhoneController m_phone = null;
     private int m_index = 0;
 
     public int Index => m_index;
@@ -48,6 +63,13 @@ public class NotesController : MonoBehaviour
             obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
             obj.transform.localScale = Vector3.one;
             m_fontList[i] = obj.GetComponent<FontController>();
+        }
+        {
+            GameObject obj = GameObject.Instantiate(m_phonePrefab, m_phoneRoot);
+            obj.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
+            obj.transform.localScale = Vector3.one;
+            m_phone = obj.GetComponent<PhoneController>();
         }
     }
 
@@ -77,7 +99,7 @@ public class NotesController : MonoBehaviour
         return m_doorList[0].IsReady(m_index);
     }
 
-    public void Ready(int index)
+    public void Ready(int index, PhoneController.eType phoneType)
     {
         Vector3 pos = transform.localPosition;
         pos.z = m_maxZ;
@@ -85,6 +107,7 @@ public class NotesController : MonoBehaviour
 
         gameObject.SetActive(true);
         m_doorList[0].Ready(index);
+        m_phone.Play(phoneType);
         m_index = index;
     }
 
@@ -128,12 +151,32 @@ public class NotesController : MonoBehaviour
 
     public void Play()
     {
-        m_doorList[0].Play(null);
-        m_fontList[0].Play(m_index);
+        m_doorList[0].Play(m_index, null);
+        m_fontList[0].Play(m_fontIndexes[m_index]);
     }
 
     public bool IsOpen()
     {
-        return m_doorList[0].IsOpen() && !IsEndMove() && !IsHide();
+        return m_doorList[0].IsOpen(m_index) && !IsEndMove() && !IsHide();
+    }
+
+    public bool IsPhoneHit(Vector3 vec)
+    {
+        var pos = Camera.main.ScreenToWorldPoint(vec);
+        RaycastHit2D[] hits = Physics2D.RaycastAll(pos, Vector2.zero);
+        if (hits != null)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void PlayPhone()
+    {
+        FontController font = m_fontList.FirstOrDefault(v => !v.gameObject.activeSelf);
+        if (font)
+        {
+            font.Play(3);
+        }
     }
 }

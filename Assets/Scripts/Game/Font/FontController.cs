@@ -23,7 +23,8 @@ public class FontController : MonoBehaviour
     {
         Animator.StringToHash("000"),
         Animator.StringToHash("001"),
-        Animator.StringToHash("002")
+        Animator.StringToHash("002"),
+        Animator.StringToHash("003"),
     };
     private readonly int m_hideHash = Animator.StringToHash("Hide");
 

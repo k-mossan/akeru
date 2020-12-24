@@ -60,6 +60,13 @@ public class StageController : MonoBehaviour
             });
             disposable.Dispose();
         });
+        this.UpdateAsObservable().Where(_ => Input.GetMouseButton(0)).Select(_ => Input.mousePosition).Subscribe(v =>
+        {
+            if (m_notesManager.IsPhoneHit(v))
+            {
+                m_notesManager.PlayPhone();
+            }
+        });
     }
 
     private void ReadyNotes()
@@ -91,6 +98,7 @@ public class StageController : MonoBehaviour
             {
                 ReadyNotes();
             });
+            m_openCount = -1;
             disposable.Dispose();
         });
     }

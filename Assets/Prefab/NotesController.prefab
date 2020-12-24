@@ -30,6 +30,7 @@ Transform:
   - {fileID: 267333229633697119}
   - {fileID: 4466042249567799237}
   - {fileID: 4256768476837349596}
+  - {fileID: 7970651345211276674}
   m_Father: {fileID: 4500743705268363144}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -81,6 +82,8 @@ MonoBehaviour:
   m_doorRoot: {fileID: 4466042249567799237}
   m_fontPrefab: {fileID: 4384767396041522307, guid: 6ef815b4e97254ebd9169dd104ed98fe, type: 3}
   m_fontRoot: {fileID: 4256768476837349596}
+  m_phonePrefab: {fileID: 4924888608705312154, guid: 7b4af79a98d4f4dbe843f1e7312ed72c, type: 3}
+  m_phoneRoot: {fileID: 7970651345211276674}
 --- !u!1 &1388419010500809411
 GameObject:
   m_ObjectHideFlags: 0
@@ -222,4 +225,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6406351147772175290}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8180960887963429044
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7970651345211276674}
+  m_Layer: 0
+  m_Name: PhoneRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7970651345211276674
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8180960887963429044}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 6406351147772175290}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
