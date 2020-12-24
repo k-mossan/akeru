@@ -40,45 +40,42 @@ public class StageController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.A)).Subscribe(_ =>
+        var disposable = new SingleAssignmentDisposable();
+        disposable.Disposable = this.UpdateAsObservable().Where(_ => this.m_notesManager.gameObject.activeSelf).Subscribe(_ =>
         {
-            var disposable = new SingleAssignmentDisposable();
-            disposable.Disposable = this.UpdateAsObservable().Where(a => m_notesManager.NotesList.Any(v => v.IsStandBy())).Subscribe(b =>
+            m_notesManager.Ready(m_tempoManager.TempoTime, () =>
             {
-                var notes = m_notesManager.NotesList.First(v => v.IsStandBy());
-                notes.Play();
+                ReadyNotes();
+                m_tempoManager.Play();
+                int prevCounter = m_tempoManager.TanCounter;
+                this.UpdateAsObservable().Where(a => m_tempoManager.TanCounter > prevCounter).Subscribe(b =>
+                {
+                    if (m_notesManager.IsOpen())
+                    {
+                        m_notesManager.Play(m_tempoManager.TempoTime, () =>
+                        {
+                            ReadyNotes();
+                        });
+                    }
+                    prevCounter = m_tempoManager.TanCounter;
+                });
+            });
+            disposable.Dispose();
+        });
+    }
+
+    private void ReadyNotes()
+    {
+        var disposable = new SingleAssignmentDisposable();
+        disposable.Disposable = this.UpdateAsObservable().Where(a => m_notesManager.IsStanBy()).Subscribe(a =>
+        {
+            disposable.Dispose();
+            disposable = new SingleAssignmentDisposable();
+            disposable.Disposable = this.UpdateAsObservable().Where(b => Input.GetKeyDown(KeyCode.A)).Subscribe(b =>
+            {
+                m_notesManager.Open();
                 disposable.Dispose();
             });
-        });
-        m_tempoManager.Play();
-
-        int prevCounter = m_tempoManager.TanCounter;
-        this.UpdateAsObservable().Where(a => m_tempoManager.TanCounter > prevCounter).Subscribe(b =>
-        {
-            NotesController openNotes = m_notesManager.NotesList.FirstOrDefault(v => v.IsOpen());
-            if (openNotes)
-            {
-                openNotes.EndMove(m_tempoManager.TempoTime);
-            }
-            int readyCount = m_notesManager.NotesList.Count(notes => notes.IsReady());
-            if (readyCount < 2)
-            {
-                for (int i = 0; i < 2 - readyCount; ++i)
-                {
-                    NotesController notes = m_notesManager.NotesList.FirstOrDefault(v => v.IsHide());
-                    if (notes)
-                    {
-                        notes.Ready(Random.Range(0, 2));
-                    }
-                }
-            }
-            readyCount = m_notesManager.NotesList.Count(notes => notes.IsReady());
-            if (readyCount > 0 && !m_notesManager.NotesList.Any(notes => notes.IsStandBy() || notes.IsStartMove() || notes.IsPlay() || (notes.IsOpen())))
-            {
-                NotesController notes = m_notesManager.NotesList.First(v => v.IsReady());
-                notes.StartMove(m_tempoManager.TempoTime);
-            }
-            prevCounter = m_tempoManager.TanCounter;
         });
     }
 }

@@ -20,6 +20,7 @@ public class NotesController : MonoBehaviour
     [SerializeField]
     private Transform m_fontRoot = null;
 
+    public readonly float m_maxZ = 50;
     private readonly int m_doorMax = 3;
     private readonly int m_fontMax = 3;
     private DoorController[] m_doorList = null;
@@ -79,7 +80,7 @@ public class NotesController : MonoBehaviour
     public void Ready(int index)
     {
         Vector3 pos = transform.localPosition;
-        pos.z = 30.0f;
+        pos.z = m_maxZ;
         transform.localPosition = pos;
 
         gameObject.SetActive(true);
@@ -90,7 +91,7 @@ public class NotesController : MonoBehaviour
     public bool IsStartMove()
     {
         Vector3 pos = transform.localPosition;
-        return pos.z < 30.0f && pos.z > 0.0f;
+        return pos.z < m_maxZ && pos.z > 0.0f;
     }
 
     public void StartMove(float time)
