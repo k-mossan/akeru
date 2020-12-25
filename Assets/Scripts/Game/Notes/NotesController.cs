@@ -41,8 +41,15 @@ public class NotesController : MonoBehaviour
     private FontController[] m_fontList = null;
     private PhoneController m_phone = null;
     private int m_index = 0;
+    private int m_phoneCount = 0;
+    private int m_phoneMax = 0;
+    private bool m_phoneFlag = false;
+    private bool m_callFlag = false;
 
     public int Index => m_index;
+    public bool PhoneFlag => m_phoneFlag;
+    public int PhoneMax => m_phoneMax;
+    public bool CallFlag => m_callFlag;
 
     private void Awake()
     {
@@ -99,7 +106,7 @@ public class NotesController : MonoBehaviour
         return m_doorList[0].IsReady(m_index);
     }
 
-    public void Ready(int index, PhoneController.eType phoneType)
+    public void Ready(int index, PhoneController.eType phoneType, int phoneMax)
     {
         Vector3 pos = transform.localPosition;
         pos.z = m_maxZ;
@@ -109,6 +116,14 @@ public class NotesController : MonoBehaviour
         m_doorList[0].Ready(index);
         m_phone.Play(phoneType);
         m_index = index;
+        if (phoneType != PhoneController.eType.None)
+        {
+            m_phoneMax = phoneMax;
+        }
+        else
+        {
+            m_phoneMax = 0;
+        }
     }
 
     public bool IsStartMove()
@@ -155,28 +170,70 @@ public class NotesController : MonoBehaviour
         m_fontList[0].Play(m_fontIndexes[m_index]);
     }
 
+    public bool IsLock()
+    {
+        return IsStandBy() && m_phoneCount < m_phoneMax;
+    }
+
     public bool IsOpen()
     {
         return m_doorList[0].IsOpen(m_index) && !IsEndMove() && !IsHide();
     }
 
-    public bool IsPhoneHit(Vector3 vec)
+    public bool IsPhoneHit(Vector3 vec, KeyCode keyCode)
     {
-        var pos = Camera.main.ScreenToWorldPoint(vec);
-        RaycastHit2D[] hits = Physics2D.RaycastAll(pos, Vector2.zero);
-        if (hits != null)
+        if (!m_phoneFlag)
         {
-            return true;
+            if ((m_phone.Type == PhoneController.eType.Left && keyCode == KeyCode.E)
+                || (m_phone.Type == PhoneController.eType.Right && keyCode == KeyCode.Q))
+            {
+                return true;
+            }
+            vec.z = 10.0f;
+            var pos = Camera.main.ScreenToWorldPoint(vec);
+            RaycastHit[] hits = Physics.RaycastAll(pos, Vector3.forward * 30.0f);
+            if (hits != null && hits.Length > 0)
+            {
+                for (int i = 0; i < hits.Length; ++i)
+                {
+                    PhoneController phone = hits[i].transform.parent.parent.GetComponentInParent<PhoneController>();
+                    if (hits[i].transform.tag == "PhoneLeft" && phone.Type == PhoneController.eType.Left
+                        || hits[i].transform.tag == "PhoneRight" && phone.Type == PhoneController.eType.Right)
+                    {
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }
 
     public void PlayPhone()
     {
+        if (!m_phoneFlag)
+        {
+            FontController font = m_fontList.FirstOrDefault(v => !v.gameObject.activeSelf);
+            if (font)
+            {
+                font.Play(3);
+            }
+            m_phoneFlag = true;
+            m_phoneCount++;
+        }
+    }
+
+    public void ClearPhoneFlag()
+    {
+        m_phoneFlag = false;
+    }
+
+    public void PlayCall()
+    {
         FontController font = m_fontList.FirstOrDefault(v => !v.gameObject.activeSelf);
         if (font)
         {
-            font.Play(3);
+            font.Play(4);
         }
+        m_callFlag = true;
     }
 }

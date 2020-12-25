@@ -21,7 +21,8 @@ public class StageController : MonoBehaviour
 
     private NotesManager m_notesManager = null;
     private TempoManager m_tempoManager = null;
-    private int m_openCount = 0;
+    private int m_openCount = -1;
+    private int m_phoneCount = -1;
 
     private void Awake()
     {
@@ -55,6 +56,18 @@ public class StageController : MonoBehaviour
                     {
                         PlayNotes();
                     }
+                    else if (m_notesManager.IsPlayPhone())
+                    {
+                        if (IsPlayTiming(m_phoneCount))
+                        {
+                            if (!m_notesManager.IsLock())
+                            {
+                                m_notesManager.PlayCall();
+                            }
+                            m_notesManager.ClearPhoneFlag();
+                            m_phoneCount = -1;
+                        }
+                    }
                     prevCounter = m_tempoManager.TanCounter;
                 });
             });
@@ -62,14 +75,28 @@ public class StageController : MonoBehaviour
         });
         this.UpdateAsObservable().Where(_ => Input.GetMouseButton(0)).Select(_ => Input.mousePosition).Subscribe(v =>
         {
-            if (m_notesManager.IsPhoneHit(v))
-            {
-                m_notesManager.PlayPhone();
-            }
+            CheckPlayPhone(v, KeyCode.None);
+        });
+        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.Q)).Select(_ => Input.mousePosition).Subscribe(v =>
+        {
+            CheckPlayPhone(v, KeyCode.Q);
+        });
+        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.E)).Select(_ => Input.mousePosition).Subscribe(v =>
+        {
+            CheckPlayPhone(v, KeyCode.E);
         });
     }
 
-    private void ReadyNotes()
+    private void CheckPlayPhone(Vector3 vec, KeyCode keyCode)
+    {
+        if (m_notesManager.IsPhoneHit(vec, keyCode))
+        {
+            m_notesManager.PlayPhone();
+            m_phoneCount = m_tempoManager.Counter % 4;
+        }
+    }
+
+    private void ReadyOpen(System.Action callback)
     {
         var disposable = new SingleAssignmentDisposable();
         disposable.Disposable = this.UpdateAsObservable().Where(a => m_notesManager.IsStanBy()).Subscribe(a =>
@@ -78,10 +105,27 @@ public class StageController : MonoBehaviour
             disposable = new SingleAssignmentDisposable();
             disposable.Disposable = this.UpdateAsObservable().Where(b => Input.GetKeyDown(KeyCode.A)).Subscribe(b =>
             {
-                m_notesManager.Open();
-                m_openCount = m_tempoManager.Counter % 4;
                 disposable.Dispose();
+                if (callback != null)
+                {
+                    callback();
+                }
             });
+        });
+    }
+
+    private void ReadyNotes()
+    {
+        ReadyOpen(() =>
+        {
+            if (m_notesManager.Open())
+            {
+                m_openCount = m_tempoManager.Counter % 4;
+            }
+            else
+            {
+                ReadyNotes();
+            }
         });
     }
 
@@ -89,17 +133,22 @@ public class StageController : MonoBehaviour
     {
         var disposable = new SingleAssignmentDisposable();
         disposable.Disposable = this.UpdateAsObservable().Where(
-            a => (m_openCount == 0 && (m_tempoManager.Counter % 4) == 3)
-            || (m_openCount == 1 && (m_tempoManager.Counter % 4) == 3)
-            || (m_openCount == 2 && (m_tempoManager.Counter % 4) == 1)
-            || (m_openCount == 3 && (m_tempoManager.Counter % 4) == 1)).Subscribe(a =>
+            a => IsPlayTiming(m_openCount)).Subscribe(a =>
         {
+            disposable.Dispose();
             m_notesManager.Play(m_tempoManager.TempoTime, () =>
             {
                 ReadyNotes();
             });
             m_openCount = -1;
-            disposable.Dispose();
         });
+    }
+
+    private bool IsPlayTiming(int count)
+    {
+        return (count == 0 && (m_tempoManager.Counter % 4) == 3)
+            || (count == 1 && (m_tempoManager.Counter % 4) == 3)
+            || (count == 2 && (m_tempoManager.Counter % 4) == 1)
+            || (count == 3 && (m_tempoManager.Counter % 4) == 1);
     }
 }

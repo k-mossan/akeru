@@ -15,6 +15,7 @@ public class NotesManager : MonoBehaviour
 
     private readonly int m_notesMax = 3;
     private readonly int m_randMax = 2;
+    private readonly int m_phoneMax = 3;
     private List<NotesController> m_notesList = new List<NotesController>();
 
     public List<NotesController> NotesList => m_notesList;
@@ -48,8 +49,8 @@ public class NotesManager : MonoBehaviour
     public void Ready(float moveTime, System.Action callback)
     {
         gameObject.SetActive(true);
-        m_notesList[0].Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max));
-        m_notesList[1].Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max));
+        m_notesList[0].Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max), Random.Range(0, m_phoneMax));
+        m_notesList[1].Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max), Random.Range(0, m_phoneMax));
         var firstDisposable = new SingleAssignmentDisposable();
         firstDisposable.Disposable = this.UpdateAsObservable().Where(_ => m_notesList[0].IsReady()).Subscribe(_ =>
         {
@@ -72,10 +73,23 @@ public class NotesManager : MonoBehaviour
         return m_notesList.Any(notes => notes.IsStandBy());
     }
 
-    public void Open()
+    public bool IsLock()
+    {
+        return m_notesList.Any(v => v.IsLock());
+    }
+
+    public bool Open()
     {
         NotesController openNotes = m_notesList.First(notes => notes.IsStandBy());
-        openNotes.Play();
+        if (openNotes.CallFlag || openNotes.PhoneMax == 0)
+        {
+            openNotes.Play();
+        }
+        else
+        {
+            return false;
+        }
+        return true;
     }
 
     public bool Opening()
@@ -118,7 +132,7 @@ public class NotesManager : MonoBehaviour
                 disposable = new SingleAssignmentDisposable();
                 disposable.Disposable = this.UpdateAsObservable().Where(b => newNotes.IsHide()).Subscribe(b =>
                 {
-                    newNotes.Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max));
+                    newNotes.Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max), Random.Range(0, m_phoneMax));
                     disposable.Dispose();
                 });
             });
@@ -126,12 +140,12 @@ public class NotesManager : MonoBehaviour
         }
     }
 
-    public bool IsPhoneHit(Vector3 vec)
+    public bool IsPhoneHit(Vector3 vec, KeyCode keyCode)
     {
         NotesController notes = m_notesList.FirstOrDefault(v => v.IsStandBy());
         if (notes)
         {
-            return notes.IsPhoneHit(vec);
+            return notes.IsPhoneHit(vec, keyCode);
         }
         return false;
     }
@@ -142,6 +156,25 @@ public class NotesManager : MonoBehaviour
         if (notes)
         {
             notes.PlayPhone();
+        }
+    }
+
+    public bool IsPlayPhone()
+    {
+        return m_notesList.Any(v => v.PhoneFlag);
+    }
+
+    public void ClearPhoneFlag()
+    {
+        m_notesList.ForEach(v => v.ClearPhoneFlag());
+    }
+
+    public void PlayCall()
+    {
+        NotesController notes = m_notesList.FirstOrDefault(v => v.PhoneFlag);
+        if (notes)
+        {
+            notes.PlayCall();
         }
     }
 }

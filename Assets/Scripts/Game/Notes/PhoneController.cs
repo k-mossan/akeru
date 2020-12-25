@@ -18,6 +18,10 @@ public class PhoneController : MonoBehaviour
     [SerializeField]
     private SpriteRenderer m_spriteRenderer = null;
 
+    private eType m_type = eType.None;
+
+    public eType Type => m_type;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,5 +32,6 @@ public class PhoneController : MonoBehaviour
     {
         gameObject.SetActive(type != eType.None);
         m_spriteRenderer.sprite = m_sprites[(int)type];
+        m_type = type;
     }
 }
