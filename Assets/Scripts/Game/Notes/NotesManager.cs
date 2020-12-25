@@ -17,6 +17,8 @@ public class NotesManager : MonoBehaviour
     private readonly int m_randMax = 2;
     private readonly int m_phoneMax = 3;
     private List<NotesController> m_notesList = new List<NotesController>();
+    private StageDataManager m_stageDataManager = null;
+    private int m_stageIndex = 0;
 
     public List<NotesController> NotesList => m_notesList;
 
@@ -46,11 +48,16 @@ public class NotesManager : MonoBehaviour
         });
     }
 
-    public void Ready(float moveTime, System.Action callback)
+    public void Ready(StageDataManager stageDataManager, float moveTime, System.Action callback)
     {
+        m_stageDataManager = stageDataManager;
+
         gameObject.SetActive(true);
-        m_notesList[0].Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max), Random.Range(0, m_phoneMax));
-        m_notesList[1].Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max), Random.Range(0, m_phoneMax));
+        List<StageData> stageList = m_stageDataManager.StageDataList;
+        m_notesList[0].Ready(stageList[m_stageIndex].NotesIndex, stageList[m_stageIndex].PhoneType, stageList[m_stageIndex].PhoneMax);
+        m_stageIndex++;
+        m_notesList[1].Ready(stageList[m_stageIndex].NotesIndex, stageList[m_stageIndex].PhoneType, stageList[m_stageIndex].PhoneMax);
+        m_stageIndex++;
         var firstDisposable = new SingleAssignmentDisposable();
         firstDisposable.Disposable = this.UpdateAsObservable().Where(_ => m_notesList[0].IsReady()).Subscribe(_ =>
         {
@@ -78,12 +85,19 @@ public class NotesManager : MonoBehaviour
         return m_notesList.Any(v => v.IsLock());
     }
 
-    public bool Open()
+    public bool Open(KeyCode keyCode)
     {
         NotesController openNotes = m_notesList.First(notes => notes.IsStandBy());
         if (openNotes.CallFlag || openNotes.PhoneMax == 0)
         {
-            openNotes.Play();
+            if (openNotes.Index == 0 && keyCode == KeyCode.A || openNotes.Index == 1 && keyCode == KeyCode.S)
+            {
+                openNotes.Play();
+            }
+            else
+            {
+                return false;
+            }
         }
         else
         {
@@ -102,7 +116,7 @@ public class NotesManager : MonoBehaviour
         return m_notesList.Any(v => v.IsOpen());
     }
 
-    public void Play(float time, System.Action destroyCallbak)
+    public void Play(float time, System.Action destroyCallbak, System.Action endCallback)
     {
         NotesController openNotes = m_notesList.FirstOrDefault(v => v.IsPlay() || v.IsOpen());
         if (openNotes)
@@ -132,7 +146,16 @@ public class NotesManager : MonoBehaviour
                 disposable = new SingleAssignmentDisposable();
                 disposable.Disposable = this.UpdateAsObservable().Where(b => newNotes.IsHide()).Subscribe(b =>
                 {
-                    newNotes.Ready(Random.Range(0, m_randMax), (PhoneController.eType)Random.Range(0, (int)PhoneController.eType.Max), Random.Range(0, m_phoneMax));
+                    if (m_stageIndex < m_stageDataManager.StageDataList.Count)
+                    {
+                        StageData data = m_stageDataManager.StageDataList[m_stageIndex];
+                        newNotes.Ready(data.NotesIndex, data.PhoneType, data.PhoneMax);
+                        m_stageIndex++;
+                    }
+                    else if (endCallback != null)
+                    {
+                        endCallback();
+                    }
                     disposable.Dispose();
                 });
             });

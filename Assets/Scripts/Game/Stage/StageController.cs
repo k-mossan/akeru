@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UniRx;
 using UniRx.Triggers;
 
@@ -19,6 +20,13 @@ public class StageController : MonoBehaviour
     [SerializeField]
     private Transform m_tempoManagerRoot = null;
 
+    [SerializeField]
+    private SpriteRenderer m_fontSpriteRenderer = null;
+
+    [SerializeField]
+    private Sprite[] m_fontSpriteList = null;
+
+    private StageDataManager m_stageDataManager = null;
     private NotesManager m_notesManager = null;
     private TempoManager m_tempoManager = null;
     private int m_openCount = -1;
@@ -37,6 +45,8 @@ public class StageController : MonoBehaviour
         obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
         obj.transform.localScale = Vector3.one;
         m_tempoManager = obj.GetComponent<TempoManager>();
+
+        m_stageDataManager = new StageDataManager(0);
     }
 
     // Start is called before the first frame update
@@ -45,33 +55,61 @@ public class StageController : MonoBehaviour
         var disposable = new SingleAssignmentDisposable();
         disposable.Disposable = this.UpdateAsObservable().Where(_ => this.m_notesManager.gameObject.activeSelf).Subscribe(_ =>
         {
-            m_notesManager.Ready(m_tempoManager.TempoTime, () =>
+            m_notesManager.Ready(m_stageDataManager, m_tempoManager.TempoTime, () =>
             {
-                ReadyNotes();
-                m_tempoManager.Play();
-                int prevCounter = m_tempoManager.TanCounter;
-                this.UpdateAsObservable().Where(a => m_tempoManager.TanCounter > prevCounter).Subscribe(b =>
-                {
-                    if (m_notesManager.Opening() || m_notesManager.IsOpen())
-                    {
-                        PlayNotes();
-                    }
-                    else if (m_notesManager.IsPlayPhone())
-                    {
-                        if (IsPlayTiming(m_phoneCount))
-                        {
-                            if (!m_notesManager.IsLock())
-                            {
-                                m_notesManager.PlayCall();
-                            }
-                            m_notesManager.ClearPhoneFlag();
-                            m_phoneCount = -1;
-                        }
-                    }
-                    prevCounter = m_tempoManager.TanCounter;
-                });
+                StartCoroutine(coStart());
             });
             disposable.Dispose();
+        });
+    }
+
+    private IEnumerator coStart()
+    {
+        yield return null;
+        m_fontSpriteRenderer.sprite = m_fontSpriteList[0];
+        yield return new WaitForSeconds(2.0f);
+        m_fontSpriteRenderer.sprite = m_fontSpriteList[1];
+        yield return new WaitForSeconds(1.0f);
+        m_fontSpriteRenderer.gameObject.SetActive(false);
+        GameStart();
+    }
+
+    private IEnumerator coEnd()
+    {
+        yield return null;
+        yield return new WaitForSeconds(3.0f);
+        m_fontSpriteRenderer.gameObject.SetActive(true);
+        m_fontSpriteRenderer.sprite = m_fontSpriteList[2];
+        yield return new WaitForSeconds(2.0f);
+        m_fontSpriteRenderer.gameObject.SetActive(false);
+        yield return new WaitForSeconds(1.0f);
+        SceneManager.LoadScene("SampleScene");
+    }
+
+    private void GameStart()
+    {
+        ReadyNotes();
+        m_tempoManager.Play();
+        int prevCounter = m_tempoManager.TanCounter;
+        this.UpdateAsObservable().Where(a => m_tempoManager.TanCounter > prevCounter).Subscribe(b =>
+        {
+            if (m_notesManager.Opening() || m_notesManager.IsOpen())
+            {
+                PlayNotes();
+            }
+            else if (m_notesManager.IsPlayPhone())
+            {
+                if (IsPlayTiming(m_phoneCount))
+                {
+                    if (!m_notesManager.IsLock())
+                    {
+                        m_notesManager.PlayCall();
+                    }
+                    m_notesManager.ClearPhoneFlag();
+                    m_phoneCount = -1;
+                }
+            }
+            prevCounter = m_tempoManager.TanCounter;
         });
         this.UpdateAsObservable().Where(_ => Input.GetMouseButton(0)).Select(_ => Input.mousePosition).Subscribe(v =>
         {
@@ -96,19 +134,26 @@ public class StageController : MonoBehaviour
         }
     }
 
-    private void ReadyOpen(System.Action callback)
+    private void ReadyOpen(System.Action<KeyCode> callback)
     {
         var disposable = new SingleAssignmentDisposable();
         disposable.Disposable = this.UpdateAsObservable().Where(a => m_notesManager.IsStanBy()).Subscribe(a =>
         {
             disposable.Dispose();
             disposable = new SingleAssignmentDisposable();
-            disposable.Disposable = this.UpdateAsObservable().Where(b => Input.GetKeyDown(KeyCode.A)).Subscribe(b =>
+            disposable.Disposable = this.UpdateAsObservable().Where(b => Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.S)).Subscribe(b =>
             {
                 disposable.Dispose();
                 if (callback != null)
                 {
-                    callback();
+                    if (Input.GetKeyDown(KeyCode.A))
+                    {
+                        callback(KeyCode.A);
+                    }
+                    else
+                    {
+                        callback(KeyCode.S);
+                    }
                 }
             });
         });
@@ -116,9 +161,9 @@ public class StageController : MonoBehaviour
 
     private void ReadyNotes()
     {
-        ReadyOpen(() =>
+        ReadyOpen((keyCode) =>
         {
-            if (m_notesManager.Open())
+            if (m_notesManager.Open(keyCode))
             {
                 m_openCount = m_tempoManager.Counter % 4;
             }
@@ -139,6 +184,9 @@ public class StageController : MonoBehaviour
             m_notesManager.Play(m_tempoManager.TempoTime, () =>
             {
                 ReadyNotes();
+            }, () =>
+            {
+                StartCoroutine(coEnd());
             });
             m_openCount = -1;
         });
