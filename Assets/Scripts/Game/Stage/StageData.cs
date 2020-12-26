@@ -2,11 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StageData
+[System.Serializable]
+public struct StageData
 {
-    private int m_notesIndex = 0;
-    private PhoneController.eType m_phoneType = PhoneController.eType.None;
-    private int m_phoneMax = 0;
+    [SerializeField]
+    private int m_notesIndex;
+
+    [SerializeField]
+    private PhoneController.eType m_phoneType;
+
+    [SerializeField]
+    private int m_phoneMax;
 
     public int NotesIndex => m_notesIndex;
     public PhoneController.eType PhoneType => m_phoneType;

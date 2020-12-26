@@ -2,24 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StageDataManager
+[CreateAssetMenu(menuName = "StageData/Create Data")]
+public class StageDataManager : ScriptableObject
 {
-    private List<StageData> m_stageDataList = new List<StageData>();
+    [SerializeField]
+    private StageData[] m_datas = null;
 
-    public List<StageData> StageDataList => m_stageDataList;
+    [SerializeField]
+    private int m_no = 0;
 
-    public StageDataManager(int stageNo)
-    {
-        if (stageNo == 0)
-        {
-            m_stageDataList.Add(new StageData(0, PhoneController.eType.Left, 2));
-            m_stageDataList.Add(new StageData(1, PhoneController.eType.Right, 2));
-            m_stageDataList.Add(new StageData(0, PhoneController.eType.None, 0));
-            //m_stageDataList.Add(new StageData(1, PhoneController.eType.None, 0));
-            //m_stageDataList.Add(new StageData(0, PhoneController.eType.None, 0));
-            //m_stageDataList.Add(new StageData(1, PhoneController.eType.None, 0));
-            //m_stageDataList.Add(new StageData(0, PhoneController.eType.None, 0));
-            //m_stageDataList.Add(new StageData(1, PhoneController.eType.None, 0));
-        }
-    }
+    public StageData[] Datas => m_datas;
+    public int No => m_no;
 }

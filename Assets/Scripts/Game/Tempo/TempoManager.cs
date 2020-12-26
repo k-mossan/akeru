@@ -23,10 +23,12 @@ public class TempoManager : MonoBehaviour
     private float m_timer = 0.0f;
     private int m_counter = 0;
     private int m_tanCounter = 0;
+    private bool m_pauseFlag = false;
 
     public float TempoTime => m_tempoTime;
     public int Counter => m_counter;
     public int TanCounter => m_tanCounter;
+    public bool PauseFlag => m_pauseFlag;
 
     private void Awake()
     {
@@ -41,61 +43,63 @@ public class TempoManager : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     public void Play()
     {
         this.UpdateAsObservable().Subscribe(_ =>
         {
-            int amari = 0;
-            m_timer += Time.deltaTime;
-            if (m_timer > m_tempoTime)
+            if (!m_pauseFlag)
             {
-                amari = m_counter % 4;
-                if (amari == 0 || amari == 2)
+                int amari = 0;
+                m_timer += Time.deltaTime;
+                if (m_timer > m_tempoTime)
                 {
-                    if (m_tempoList.Any(tempo => tempo.IsStundBy()))
+                    amari = m_counter % 4;
+                    if (amari == 0 || amari == 2)
                     {
-                        m_tempoList.First(tempo => tempo.IsStundBy()).Play();
+                        if (m_tempoList.Any(tempo => tempo.IsStundBy()))
+                        {
+                            m_tempoList.First(tempo => tempo.IsStundBy()).Play();
+                        }
+                        ++m_tanCounter;
                     }
-                    ++m_tanCounter;
+                    m_timer -= m_tempoTime;
+                    ++m_counter;
                 }
-                m_timer -= m_tempoTime;
-                ++m_counter;
+                float y = m_timer * m_timer;
+                Vector3 pos = m_barTransform.localPosition;
+                amari = m_counter % 4;
+                float rate = m_timer / m_tempoTime;
+                switch (amari)
+                {
+                    case 0:
+                        rate = m_timer / m_tempoTime;
+                        pos.x = rate * rate * m_center;
+                        break;
+                    case 1:
+                        rate = 1.0f - m_timer / m_tempoTime;
+                        pos.x = m_center + (1.0f - rate * rate) * m_center;
+                        break;
+                    case 2:
+                        rate = m_timer / m_tempoTime;
+                        pos.x = m_center * 2.0f - rate * rate * m_center;
+                        break;
+                    case 3:
+                        rate = 1.0f - m_timer / m_tempoTime;
+                        pos.x = m_center - (1.0f - rate * rate) * m_center;
+                        break;
+                }
+                m_barTransform.localPosition = pos;
             }
-            float y = m_timer * m_timer;
-            Vector3 pos = m_barTransform.localPosition;
-            amari = m_counter % 4;
-            float rate = m_timer / m_tempoTime;
-            switch (amari)
-            {
-                case 0:
-                    rate = m_timer / m_tempoTime;
-                    pos.x = rate * rate * m_center;
-                    break;
-                case 1:
-                    rate = 1.0f - m_timer / m_tempoTime;
-                    pos.x = m_center + (1.0f - rate * rate) * m_center;
-                    break;
-                case 2:
-                    rate = m_timer / m_tempoTime;
-                    pos.x = m_center * 2.0f - rate * rate * m_center;
-                    break;
-                case 3:
-                    rate = 1.0f - m_timer / m_tempoTime;
-                    pos.x = m_center - (1.0f - rate * rate) * m_center;
-                    break;
-            }
-            m_barTransform.localPosition = pos;
         });
     }
 
     public float GetScoreRate()
     {
         return 1.0f - Mathf.Abs(m_barTransform.localPosition.x - m_center);
+    }
+
+    public void SetPause(bool flag)
+    {
+        m_pauseFlag = flag;
     }
 }

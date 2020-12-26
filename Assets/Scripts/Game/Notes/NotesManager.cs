@@ -53,7 +53,7 @@ public class NotesManager : MonoBehaviour
         m_stageDataManager = stageDataManager;
 
         gameObject.SetActive(true);
-        List<StageData> stageList = m_stageDataManager.StageDataList;
+        StageData[] stageList = m_stageDataManager.Datas;
         m_notesList[0].Ready(stageList[m_stageIndex].NotesIndex, stageList[m_stageIndex].PhoneType, stageList[m_stageIndex].PhoneMax);
         m_stageIndex++;
         m_notesList[1].Ready(stageList[m_stageIndex].NotesIndex, stageList[m_stageIndex].PhoneType, stageList[m_stageIndex].PhoneMax);
@@ -157,9 +157,9 @@ public class NotesManager : MonoBehaviour
                 disposable = new SingleAssignmentDisposable();
                 disposable.Disposable = this.UpdateAsObservable().Where(b => newNotes.IsHide()).Subscribe(b =>
                 {
-                    if (m_stageIndex < m_stageDataManager.StageDataList.Count)
+                    if (m_stageIndex < m_stageDataManager.Datas.Length)
                     {
-                        StageData data = m_stageDataManager.StageDataList[m_stageIndex];
+                        StageData data = m_stageDataManager.Datas[m_stageIndex];
                         newNotes.Ready(data.NotesIndex, data.PhoneType, data.PhoneMax);
                         m_stageIndex++;
                     }

@@ -22,14 +22,24 @@ public class StageController : MonoBehaviour
     private Transform m_tempoManagerRoot = null;
 
     [SerializeField]
+    private GameObject m_tutorialPrefab = null;
+
+    [SerializeField]
+    private Transform m_tutorialRoot = null;
+
+    [SerializeField]
     private SpriteRenderer m_fontSpriteRenderer = null;
 
     [SerializeField]
     private Sprite[] m_fontSpriteList = null;
 
+    [SerializeField]
     private StageDataManager m_stageDataManager = null;
+
     private NotesManager m_notesManager = null;
     private TempoManager m_tempoManager = null;
+    private TutorialController m_tutorialController = null;
+    private int m_noteNum = 0;
     private int m_openCount = -1;
     private int m_phoneCount = -1;
     private int m_totalScore = 0;
@@ -48,7 +58,11 @@ public class StageController : MonoBehaviour
         obj.transform.localScale = Vector3.one;
         m_tempoManager = obj.GetComponent<TempoManager>();
 
-        m_stageDataManager = new StageDataManager(0);
+        obj = GameObject.Instantiate(m_tutorialPrefab, m_tutorialRoot);
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        obj.transform.localScale = Vector3.one;
+        m_tutorialController = obj.GetComponent<TutorialController>();
     }
 
     // Start is called before the first frame update
@@ -112,20 +126,38 @@ public class StageController : MonoBehaviour
                     m_phoneCount = -1;
                 }
             }
-            prevCounter = m_tempoManager.TanCounter;
+            else if (m_tutorialController && m_tutorialController.IsPlay(m_stageDataManager.No, m_noteNum))
+            {
+                m_tutorialController.Play(m_stageDataManager.No, m_noteNum);
+                m_tempoManager.SetPause(true);
+            }
+            if (!m_tempoManager.PauseFlag)
+            {
+                prevCounter = m_tempoManager.TanCounter;
+            }
         });
-        this.UpdateAsObservable().Where(_ => Input.GetMouseButton(0)).Select(_ => Input.mousePosition).Subscribe(v =>
+        //this.UpdateAsObservable().Where(_ => Input.GetMouseButton(0) && CheckTutorialControl(TutorialData.eType.LeftDoor)).Select(_ => Input.mousePosition).Subscribe(v =>
+        //{
+        //    CheckPlayPhone(v, KeyCode.None);
+        //});
+        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.Q) && CheckTutorialControl(TutorialData.eType.LeftPhone)).Select(_ => Input.mousePosition).Subscribe(v =>
         {
-            CheckPlayPhone(v, KeyCode.None);
-        });
-        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.Q)).Select(_ => Input.mousePosition).Subscribe(v =>
-        {
+            m_tempoManager.SetPause(false);
             CheckPlayPhone(v, KeyCode.Q);
         });
-        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.E)).Select(_ => Input.mousePosition).Subscribe(v =>
+        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.E) && CheckTutorialControl(TutorialData.eType.RightPhone)).Select(_ => Input.mousePosition).Subscribe(v =>
         {
+            m_tempoManager.SetPause(false);
             CheckPlayPhone(v, KeyCode.E);
         });
+    }
+
+    private bool CheckTutorialControl(TutorialData.eType type)
+    {
+        TutorialData.eType getType = m_tutorialController ? m_tutorialController.GetType(m_stageDataManager.No, m_noteNum) : TutorialData.eType.None;
+        return (!m_tutorialController
+            || !m_tutorialController.IsPlay(m_stageDataManager.No, m_noteNum)
+            || (m_tempoManager.PauseFlag && (getType == type || getType == TutorialData.eType.None)));
     }
 
     private void CheckPlayPhone(Vector3 vec, KeyCode keyCode)
@@ -146,15 +178,21 @@ public class StageController : MonoBehaviour
             disposable = new SingleAssignmentDisposable();
             disposable.Disposable = this.UpdateAsObservable().Where(b => Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.S)).Subscribe(b =>
             {
-                disposable.Dispose();
-                if (callback != null)
+                if (Input.GetKeyDown(KeyCode.A) && CheckTutorialControl(TutorialData.eType.LeftDoor))
                 {
-                    if (Input.GetKeyDown(KeyCode.A))
+                    disposable.Dispose();
+                    if (callback != null)
                     {
                         callback(KeyCode.A);
+                        m_tempoManager.SetPause(false);
                     }
-                    else
+                }
+                else if (Input.GetKeyDown(KeyCode.S) && CheckTutorialControl(TutorialData.eType.RightDoor))
+                {
+                    disposable.Dispose();
+                    if (callback != null)
                     {
+                        m_tempoManager.SetPause(false);
                         callback(KeyCode.S);
                     }
                 }
@@ -168,6 +206,9 @@ public class StageController : MonoBehaviour
         {
             if (m_notesManager.Open(keyCode))
             {
+                m_tempoManager.SetPause(false);
+                m_tutorialController.Hide();
+                m_noteNum++;
                 float rate = m_tempoManager.GetScoreRate();
                 int score = (int)(100 * rate);
                 m_totalScore += score;
