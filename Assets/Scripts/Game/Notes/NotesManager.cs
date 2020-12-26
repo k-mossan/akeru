@@ -21,6 +21,7 @@ public class NotesManager : MonoBehaviour
     private int m_stageIndex = 0;
 
     public List<NotesController> NotesList => m_notesList;
+    public StageDataManager StageDataManager => m_stageDataManager;
 
     private void Awake()
     {

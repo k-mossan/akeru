@@ -25,15 +25,11 @@ MonoBehaviour:
     m_notes: 2
     m_type: 0
     m_sprite: {fileID: 21300000, guid: e538530ff51674da2ac2f7a43e3247d3, type: 3}
-  - m_stage: 1
-    m_notes: 0
-    m_type: 0
+  - m_stage: 0
+    m_notes: 7
+    m_type: 3
     m_sprite: {fileID: 21300000, guid: d14f06609941b49cda632911c42c3c08, type: 3}
-  - m_stage: 1
-    m_notes: 1
-    m_type: 0
+  - m_stage: 0
+    m_notes: 8
+    m_type: 4
     m_sprite: {fileID: 21300000, guid: 81d9f883abd3849b0a3330c8dbfc6314, type: 3}
-  - m_stage: 1
-    m_notes: 2
-    m_type: 0
-    m_sprite: {fileID: 21300000, guid: b8ebdacbd76b647bfa3fe98f7783a5de, type: 3}

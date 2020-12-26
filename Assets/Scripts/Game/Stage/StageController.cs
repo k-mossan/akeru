@@ -94,7 +94,7 @@ public class StageController : MonoBehaviour
     private IEnumerator coEnd()
     {
         yield return null;
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(1.0f);
         m_fontSpriteRenderer.gameObject.SetActive(true);
         m_fontSpriteRenderer.sprite = m_fontSpriteList[2];
         yield return new WaitForSeconds(2.0f);
@@ -140,15 +140,17 @@ public class StageController : MonoBehaviour
         //{
         //    CheckPlayPhone(v, KeyCode.None);
         //});
-        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.Q) && CheckTutorialControl(TutorialData.eType.LeftPhone)).Select(_ => Input.mousePosition).Subscribe(v =>
+        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.Q) && CheckTutorialControl(TutorialData.eType.RightPhone)).Select(_ => Input.mousePosition).Subscribe(v =>
         {
+            m_tutorialController.Hide();
             m_tempoManager.SetPause(false);
             CheckPlayPhone(v, KeyCode.Q);
         });
-        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.E) && CheckTutorialControl(TutorialData.eType.RightPhone)).Select(_ => Input.mousePosition).Subscribe(v =>
+        this.UpdateAsObservable().Where(_ => Input.GetKeyDown(KeyCode.W) && CheckTutorialControl(TutorialData.eType.LeftPhone)).Select(_ => Input.mousePosition).Subscribe(v =>
         {
+            m_tutorialController.Hide();
             m_tempoManager.SetPause(false);
-            CheckPlayPhone(v, KeyCode.E);
+            CheckPlayPhone(v, KeyCode.W);
         });
     }
 
@@ -178,7 +180,7 @@ public class StageController : MonoBehaviour
             disposable = new SingleAssignmentDisposable();
             disposable.Disposable = this.UpdateAsObservable().Where(b => Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.S)).Subscribe(b =>
             {
-                if (Input.GetKeyDown(KeyCode.A) && CheckTutorialControl(TutorialData.eType.LeftDoor))
+                if (Input.GetKeyDown(KeyCode.A) && (CheckTutorialControl(TutorialData.eType.LeftDoor) ||  CheckTutorialControl(TutorialData.eType.RightPhone) || CheckTutorialControl(TutorialData.eType.LeftPhone)))
                 {
                     disposable.Dispose();
                     if (callback != null)
@@ -187,7 +189,7 @@ public class StageController : MonoBehaviour
                         m_tempoManager.SetPause(false);
                     }
                 }
-                else if (Input.GetKeyDown(KeyCode.S) && CheckTutorialControl(TutorialData.eType.RightDoor))
+                else if (Input.GetKeyDown(KeyCode.S) && (CheckTutorialControl(TutorialData.eType.RightDoor) || CheckTutorialControl(TutorialData.eType.RightPhone) || CheckTutorialControl(TutorialData.eType.LeftPhone)))
                 {
                     disposable.Dispose();
                     if (callback != null)
@@ -240,11 +242,15 @@ public class StageController : MonoBehaviour
             disposable.Dispose();
             m_notesManager.Play(m_tempoManager.TempoTime, () =>
             {
-                ReadyNotes();
-            }, () =>
-            {
-                StartCoroutine(coEnd());
-            });
+                if (m_noteNum < m_notesManager.StageDataManager.Datas.Length)
+                {
+                    ReadyNotes();
+                }
+                else
+                {
+                    StartCoroutine(coEnd());
+                }
+            }, null);
             m_openCount = -1;
         });
     }

@@ -194,7 +194,7 @@ public class NotesController : MonoBehaviour
     {
         if (!m_phoneFlag)
         {
-            if ((m_phone.Type == PhoneController.eType.Left && keyCode == KeyCode.E)
+            if ((m_phone.Type == PhoneController.eType.Left && keyCode == KeyCode.W)
                 || (m_phone.Type == PhoneController.eType.Right && keyCode == KeyCode.Q))
             {
                 return true;
