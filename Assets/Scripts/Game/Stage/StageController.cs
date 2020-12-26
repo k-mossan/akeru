@@ -99,6 +99,7 @@ public class StageController : MonoBehaviour
         m_fontSpriteRenderer.sprite = m_fontSpriteList[2];
         yield return new WaitForSeconds(2.0f);
         m_fontSpriteRenderer.gameObject.SetActive(false);
+        UIGame.Instance.FadeOut();
         yield return new WaitForSeconds(1.0f);
         SceneManager.LoadScene("SampleScene");
     }
