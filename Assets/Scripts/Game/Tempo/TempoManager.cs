@@ -18,6 +18,7 @@ public class TempoManager : MonoBehaviour
 
     private readonly int m_tempoMax = 3;
     private readonly float m_tempoTime = 0.5f;
+    private readonly float m_center = 1.0f;
     private TempoController[] m_tempoList = null;
     private float m_timer = 0.0f;
     private int m_counter = 0;
@@ -67,7 +68,6 @@ public class TempoManager : MonoBehaviour
                 ++m_counter;
             }
             float y = m_timer * m_timer;
-            const float center = 1.0f;
             Vector3 pos = m_barTransform.localPosition;
             amari = m_counter % 4;
             float rate = m_timer / m_tempoTime;
@@ -75,22 +75,27 @@ public class TempoManager : MonoBehaviour
             {
                 case 0:
                     rate = m_timer / m_tempoTime;
-                    pos.x = rate * rate * center;
+                    pos.x = rate * rate * m_center;
                     break;
                 case 1:
                     rate = 1.0f - m_timer / m_tempoTime;
-                    pos.x = center + (1.0f - rate * rate) * center;
+                    pos.x = m_center + (1.0f - rate * rate) * m_center;
                     break;
                 case 2:
                     rate = m_timer / m_tempoTime;
-                    pos.x = center * 2.0f - rate * rate * center;
+                    pos.x = m_center * 2.0f - rate * rate * m_center;
                     break;
                 case 3:
                     rate = 1.0f - m_timer / m_tempoTime;
-                    pos.x = center - (1.0f - rate * rate) * center;
+                    pos.x = m_center - (1.0f - rate * rate) * m_center;
                     break;
             }
             m_barTransform.localPosition = pos;
         });
+    }
+
+    public float GetScoreRate()
+    {
+        return 1.0f - Mathf.Abs(m_barTransform.localPosition.x - m_center);
     }
 }

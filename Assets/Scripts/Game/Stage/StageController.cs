@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UniRx;
 using UniRx.Triggers;
+using DG.Tweening;
 
 public class StageController : MonoBehaviour
 {
@@ -165,6 +166,16 @@ public class StageController : MonoBehaviour
         {
             if (m_notesManager.Open(keyCode))
             {
+                float rate = m_tempoManager.GetScoreRate();
+                GameManager.Instance.Score.Play((int)(100 * rate));
+                GameManager.Instance.Score.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                GameManager.Instance.Score.transform.DOScale(4.0f * rate + 1.0f, 0.2f).OnComplete(() =>
+                {
+                    this.transform.DOScale(this.transform.localScale, 0.5f).OnComplete(() =>
+                    {
+                        GameManager.Instance.Score.Hide();
+                    });
+                });
                 m_openCount = m_tempoManager.Counter % 4;
             }
             else
