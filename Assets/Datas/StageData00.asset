@@ -40,4 +40,19 @@ MonoBehaviour:
   - m_notesIndex: 1
     m_phoneType: 2
     m_phoneMax: 1
+  - m_notesIndex: 0
+    m_phoneType: 2
+    m_phoneMax: 1
+  - m_notesIndex: 1
+    m_phoneType: 1
+    m_phoneMax: 1
+  - m_notesIndex: 0
+    m_phoneType: 1
+    m_phoneMax: 1
+  - m_notesIndex: 1
+    m_phoneType: 2
+    m_phoneMax: 1
+  - m_notesIndex: 0
+    m_phoneType: 1
+    m_phoneMax: 2
   m_no: 0
