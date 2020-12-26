@@ -166,6 +166,10 @@ public class StageController : MonoBehaviour
     {
         if (m_notesManager.IsPhoneHit(vec, keyCode))
         {
+            if (m_notesManager.IsLock())
+            {
+                AddScore();
+            }
             m_notesManager.PlayPhone();
             m_phoneCount = m_tempoManager.Counter % 4;
         }
@@ -211,19 +215,7 @@ public class StageController : MonoBehaviour
                 m_tempoManager.SetPause(false);
                 m_tutorialController.Hide();
                 m_noteNum++;
-                float rate = m_tempoManager.GetScoreRate();
-                int score = (int)(100 * rate);
-                m_totalScore += score;
-                GameManager.Instance.TotalScore.Play(m_totalScore);
-                GameManager.Instance.Score.Play(score);
-                GameManager.Instance.Score.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-                GameManager.Instance.Score.transform.DOScale(4.0f * rate + 1.0f, 0.2f).OnComplete(() =>
-                {
-                    this.transform.DOScale(this.transform.localScale, 0.5f).OnComplete(() =>
-                    {
-                        GameManager.Instance.Score.Hide();
-                    });
-                });
+                AddScore();
                 m_openCount = m_tempoManager.Counter % 4;
             }
             else
@@ -261,5 +253,22 @@ public class StageController : MonoBehaviour
             || (count == 1 && (m_tempoManager.Counter % 4) == 3)
             || (count == 2 && (m_tempoManager.Counter % 4) == 1)
             || (count == 3 && (m_tempoManager.Counter % 4) == 1);
+    }
+
+    private void AddScore()
+    {
+        float rate = m_tempoManager.GetScoreRate();
+        int score = (int)(100 * rate);
+        m_totalScore += score;
+        GameManager.Instance.TotalScore.Play(m_totalScore);
+        GameManager.Instance.Score.Play(score);
+        GameManager.Instance.Score.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        GameManager.Instance.Score.transform.DOScale(4.0f * rate + 1.0f, 0.2f).OnComplete(() =>
+        {
+            this.transform.DOScale(this.transform.localScale, 0.5f).OnComplete(() =>
+            {
+                GameManager.Instance.Score.Hide();
+            });
+        });
     }
 }
