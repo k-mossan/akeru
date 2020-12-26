@@ -32,6 +32,7 @@ public class StageController : MonoBehaviour
     private TempoManager m_tempoManager = null;
     private int m_openCount = -1;
     private int m_phoneCount = -1;
+    private int m_totalScore = 0;
 
     private void Awake()
     {
@@ -67,6 +68,7 @@ public class StageController : MonoBehaviour
     private IEnumerator coStart()
     {
         yield return null;
+        GameManager.Instance.TotalScore.Play(0);
         m_fontSpriteRenderer.sprite = m_fontSpriteList[0];
         yield return new WaitForSeconds(2.0f);
         m_fontSpriteRenderer.sprite = m_fontSpriteList[1];
@@ -167,7 +169,10 @@ public class StageController : MonoBehaviour
             if (m_notesManager.Open(keyCode))
             {
                 float rate = m_tempoManager.GetScoreRate();
-                GameManager.Instance.Score.Play((int)(100 * rate));
+                int score = (int)(100 * rate);
+                m_totalScore += score;
+                GameManager.Instance.TotalScore.Play(m_totalScore);
+                GameManager.Instance.Score.Play(score);
                 GameManager.Instance.Score.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                 GameManager.Instance.Score.transform.DOScale(4.0f * rate + 1.0f, 0.2f).OnComplete(() =>
                 {

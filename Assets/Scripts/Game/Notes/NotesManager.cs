@@ -90,7 +90,7 @@ public class NotesManager : MonoBehaviour
         NotesController openNotes = m_notesList.First(notes => notes.IsStandBy());
         if (openNotes.CallFlag || openNotes.PhoneMax == 0)
         {
-            if (openNotes.Index == 0 && keyCode == KeyCode.A || openNotes.Index == 1 && keyCode == KeyCode.S)
+            if (keyCode == KeyCode.A || openNotes.Index == 1 && keyCode == KeyCode.S)
             {
                 openNotes.Play();
             }
@@ -101,6 +101,17 @@ public class NotesManager : MonoBehaviour
         }
         else
         {
+            if (keyCode == KeyCode.A || openNotes.Index == 1 && keyCode == KeyCode.S)
+            {
+                if (keyCode == KeyCode.A)
+                {
+                    openNotes.LockLeft();
+                }
+                else if (keyCode == KeyCode.S)
+                {
+                    openNotes.LockRight();
+                }
+            }
             return false;
         }
         return true;

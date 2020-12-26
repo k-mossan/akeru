@@ -12,8 +12,8 @@ public class StageDataManager
     {
         if (stageNo == 0)
         {
-            m_stageDataList.Add(new StageData(0, PhoneController.eType.None, 0));
-            m_stageDataList.Add(new StageData(1, PhoneController.eType.None, 0));
+            m_stageDataList.Add(new StageData(0, PhoneController.eType.Left, 2));
+            m_stageDataList.Add(new StageData(1, PhoneController.eType.Right, 2));
             m_stageDataList.Add(new StageData(0, PhoneController.eType.None, 0));
             //m_stageDataList.Add(new StageData(1, PhoneController.eType.None, 0));
             //m_stageDataList.Add(new StageData(0, PhoneController.eType.None, 0));

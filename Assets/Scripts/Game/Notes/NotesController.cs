@@ -34,7 +34,7 @@ public class NotesController : MonoBehaviour
         0,
         1,
         0,
-        1
+        1,
     };
 
     private DoorController[] m_doorList = null;
@@ -173,6 +173,16 @@ public class NotesController : MonoBehaviour
     public bool IsLock()
     {
         return IsStandBy() && m_phoneCount < m_phoneMax;
+    }
+
+    public void LockLeft()
+    {
+        m_fontList[0].Play(5);
+    }
+
+    public void LockRight()
+    {
+        m_fontList[0].Play(6);
     }
 
     public bool IsOpen()
