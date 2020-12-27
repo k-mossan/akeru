@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UniRx;
 using UniRx.Triggers;
 using DG.Tweening;
@@ -34,15 +33,23 @@ public class StageController : MonoBehaviour
     private Sprite[] m_fontSpriteList = null;
 
     [SerializeField]
-    private StageDataManager m_stageDataManager = null;
+    private StageDataManager[] m_stageDataList = null;
 
     private NotesManager m_notesManager = null;
     private TempoManager m_tempoManager = null;
     private TutorialController m_tutorialController = null;
+    private int m_currentStageNo = 0;
     private int m_noteNum = 0;
     private int m_openCount = -1;
     private int m_phoneCount = -1;
     private int m_totalScore = 0;
+
+    public StageDataManager[] StageDataList => m_stageDataList;
+
+    public void Init(int stageNo)
+    {
+        m_currentStageNo = stageNo;
+    }
 
     private void Awake()
     {
@@ -71,7 +78,7 @@ public class StageController : MonoBehaviour
         var disposable = new SingleAssignmentDisposable();
         disposable.Disposable = this.UpdateAsObservable().Where(_ => this.m_notesManager.gameObject.activeSelf).Subscribe(_ =>
         {
-            m_notesManager.Ready(m_stageDataManager, m_tempoManager.TempoTime, () =>
+            m_notesManager.Ready(m_stageDataList[m_currentStageNo], m_tempoManager.TempoTime, () =>
             {
                 StartCoroutine(coStart());
             });
@@ -94,6 +101,7 @@ public class StageController : MonoBehaviour
     private IEnumerator coEnd()
     {
         yield return null;
+        m_tempoManager.SetPause(true);
         yield return new WaitForSeconds(1.0f);
         m_fontSpriteRenderer.gameObject.SetActive(true);
         m_fontSpriteRenderer.sprite = m_fontSpriteList[2];
@@ -101,7 +109,7 @@ public class StageController : MonoBehaviour
         m_fontSpriteRenderer.gameObject.SetActive(false);
         UIGame.Instance.FadeOut();
         yield return new WaitForSeconds(1.0f);
-        SceneManager.LoadScene("SampleScene");
+        GameManager.Instance.NextStage();
     }
 
     private void GameStart()
@@ -127,9 +135,9 @@ public class StageController : MonoBehaviour
                     m_phoneCount = -1;
                 }
             }
-            else if (m_tutorialController && m_tutorialController.IsPlay(m_stageDataManager.No, m_noteNum))
+            else if (m_tutorialController && m_tutorialController.IsPlay(m_currentStageNo, m_noteNum))
             {
-                m_tutorialController.Play(m_stageDataManager.No, m_noteNum);
+                m_tutorialController.Play(m_currentStageNo, m_noteNum);
                 m_tempoManager.SetPause(true);
             }
             if (!m_tempoManager.PauseFlag)
@@ -157,9 +165,9 @@ public class StageController : MonoBehaviour
 
     private bool CheckTutorialControl(TutorialData.eType type)
     {
-        TutorialData.eType getType = m_tutorialController ? m_tutorialController.GetType(m_stageDataManager.No, m_noteNum) : TutorialData.eType.None;
+        TutorialData.eType getType = m_tutorialController ? m_tutorialController.GetType(m_currentStageNo, m_noteNum) : TutorialData.eType.None;
         return (!m_tutorialController
-            || !m_tutorialController.IsPlay(m_stageDataManager.No, m_noteNum)
+            || !m_tutorialController.IsPlay(m_currentStageNo, m_noteNum)
             || (m_tempoManager.PauseFlag && (getType == type || getType == TutorialData.eType.None)));
     }
 
@@ -259,7 +267,7 @@ public class StageController : MonoBehaviour
     private void AddScore()
     {
         float rate = m_tempoManager.GetScoreRate();
-        int score = (int)(100 * rate);
+        int score = (int)(100 * rate) + 1;
         m_totalScore += score;
         GameManager.Instance.TotalScore.Play(m_totalScore);
         GameManager.Instance.Score.Play(score);

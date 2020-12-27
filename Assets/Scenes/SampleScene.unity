@@ -166,6 +166,7 @@ GameObject:
   m_Component:
   - component: {fileID: 180543773}
   - component: {fileID: 180543774}
+  - component: {fileID: 180543775}
   m_Layer: 0
   m_Name: GameRoot
   m_TagString: Untagged
@@ -187,6 +188,7 @@ Transform:
   - {fileID: 1676543954}
   - {fileID: 1428299253}
   - {fileID: 1732510483}
+  - {fileID: 1991917570}
   m_Father: {fileID: 367054587}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -210,6 +212,21 @@ MonoBehaviour:
   m_scoreRoot: {fileID: 1227759727}
   m_totalScorePrefab: {fileID: 7293143064981148991, guid: 45c0cddd998234d55b97adfe12939d80, type: 3}
   m_totalScoreRoot: {fileID: 1099692496}
+--- !u!114 &180543775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180543772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b16462066504993a221c774f438025, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_soundPrefab: {fileID: 3993220696298804924, guid: e31206f165ef24522a4fce28b7683fb1, type: 3}
+  m_soundRoot: {fileID: 1991917570}
+  m_soundNum: 10
 --- !u!1 &202063126
 GameObject:
   m_ObjectHideFlags: 0
@@ -1450,6 +1467,36 @@ ReflectionProbe:
   m_UseOcclusionCulling: 1
   m_Importance: 1
   m_CustomBakedTexture: {fileID: 0}
+--- !u!1 &1991917569
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1991917570}
+  m_Layer: 0
+  m_Name: SoundRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1991917570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991917569}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 180543773}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2054312159
 GameObject:
   m_ObjectHideFlags: 0

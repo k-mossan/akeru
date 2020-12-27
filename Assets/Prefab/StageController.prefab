@@ -201,7 +201,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fa4d20c9c091f4ac79c5eaa258c4b42d, type: 3}
   - {fileID: 21300000, guid: 95c8ed9d2b8ec4c69be571d2be2de776, type: 3}
   - {fileID: 21300000, guid: 04b0b13010f204fe3b289e0602b3218b, type: 3}
-  m_stageDataManager: {fileID: 11400000, guid: 7d30556df2e6f4b76af0d1284190f3c2, type: 2}
+  m_stageDataList:
+  - {fileID: 11400000, guid: 7d30556df2e6f4b76af0d1284190f3c2, type: 2}
+  - {fileID: 11400000, guid: 18e6fee718ef8427fa454f55f969247f, type: 2}
 --- !u!1 &7901133299577556125
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : SingletonMonoBehaviour<GameManager>
 {
@@ -32,6 +33,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     private StageController m_stage = null;
     private NumberManager m_score = null;
     private NumberManager m_totalScore = null;
+    private static int m_stageNo = 0;
 
     public PlayerController Player => m_player;
     public StageController Stage => m_stage;
@@ -51,6 +53,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
         obj.transform.localScale = Vector3.one;
         m_stage = obj.GetComponent<StageController>();
+        m_stage.Init(m_stageNo);
         obj = GameObject.Instantiate(m_scorePrefab, m_scoreRoot);
         obj.transform.localPosition = Vector3.zero;
         obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
@@ -67,5 +70,15 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     void Update()
     {
         
+    }
+
+    public void NextStage()
+    {
+        m_stageNo++;
+        if (m_stage && m_stageNo >= m_stage.StageDataList.Length)
+        {
+            m_stageNo = 1;
+        }
+        SceneManager.LoadScene("SampleScene");
     }
 }

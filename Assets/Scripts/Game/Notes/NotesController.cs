@@ -226,6 +226,7 @@ public class NotesController : MonoBehaviour
             if (font)
             {
                 font.Play(3);
+                SoundManager.Instance.Play(SoundController.eType.PINPON);
             }
             m_phoneFlag = true;
             m_phoneCount++;
@@ -243,6 +244,7 @@ public class NotesController : MonoBehaviour
         if (font)
         {
             font.Play(4);
+            SoundManager.Instance.Play(SoundController.eType.YES);
         }
         m_callFlag = true;
     }

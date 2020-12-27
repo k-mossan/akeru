@@ -28,6 +28,7 @@ public class TempoController : MonoBehaviour
 
     public void Play()
     {
+        SoundManager.Instance.Play(SoundController.eType.TAN);
         m_font.Play(2);
     }
 

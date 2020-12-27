@@ -54,6 +54,7 @@ public class DoorController : MonoBehaviour
 
     public void Play(int index, System.Action callback)
     {
+        SoundManager.Instance.Play((SoundController.eType)index);
         m_animator.SetTrigger(m_openedHashs[index]);
         var disposable = new SingleAssignmentDisposable();
         disposable.Disposable = this.UpdateAsObservable().Where(a => m_animator.GetCurrentAnimatorStateInfo(0).shortNameHash != m_openedHashs[index]).Subscribe(b =>
