@@ -35,14 +35,30 @@ public class StageController : MonoBehaviour
     [SerializeField]
     private StageDataManager[] m_stageDataList = null;
 
+    [SerializeField]
+    private GameObject m_resultNumberPrefab = null;
+
+    [SerializeField]
+    private Transform m_resultScoreRoot = null;
+
+    [SerializeField]
+    private Transform m_resultBonusRoot = null;
+
+    [SerializeField]
+    private Transform m_resultTotalRoot = null;
+
     private NotesManager m_notesManager = null;
     private TempoManager m_tempoManager = null;
     private TutorialController m_tutorialController = null;
+    private NumberManager m_resultNumberScore = null;
+    private NumberManager m_resultNumberBonus = null;
+    private NumberManager m_resultNumberTotal = null;
     private int m_currentStageNo = 0;
     private int m_noteNum = 0;
     private int m_openCount = -1;
     private int m_phoneCount = -1;
     private int m_totalScore = 0;
+    private int m_turnMax = 0;
 
     public StageDataManager[] StageDataList => m_stageDataList;
 
@@ -70,6 +86,15 @@ public class StageController : MonoBehaviour
         obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
         obj.transform.localScale = Vector3.one;
         m_tutorialController = obj.GetComponent<TutorialController>();
+
+        CreateResult();
+
+        m_turnMax = 1;
+        for (int i = 0; i < m_stageDataList[m_currentStageNo].Datas.Length; ++i)
+        {
+            m_turnMax += 2 + m_stageDataList[m_currentStageNo].Datas[i].PhoneMax;
+            m_turnMax += m_stageDataList[m_currentStageNo].Datas[i].PhoneMax > 0 ? 1 : 0;
+        }
     }
 
     // Start is called before the first frame update
@@ -90,6 +115,7 @@ public class StageController : MonoBehaviour
     {
         yield return null;
         GameManager.Instance.TotalScore.Play(0);
+        GameManager.Instance.Count.Play(0);
         m_fontSpriteRenderer.sprite = m_fontSpriteList[0];
         yield return new WaitForSeconds(2.0f);
         m_fontSpriteRenderer.sprite = m_fontSpriteList[1];
@@ -100,16 +126,48 @@ public class StageController : MonoBehaviour
 
     private IEnumerator coEnd()
     {
+        int turnNum = m_tempoManager.TanCounter - m_turnMax;
+        turnNum = turnNum > m_turnMax ? m_turnMax : turnNum;
+        float bonusRate = 1.0f - (float)turnNum / (float)m_turnMax;
+        int bonusMul = (int)(bonusRate * 10.0f * 100.0f);
         yield return null;
         m_tempoManager.SetPause(true);
         yield return new WaitForSeconds(1.0f);
         m_fontSpriteRenderer.gameObject.SetActive(true);
         m_fontSpriteRenderer.sprite = m_fontSpriteList[2];
         yield return new WaitForSeconds(2.0f);
-        m_fontSpriteRenderer.gameObject.SetActive(false);
+        m_fontSpriteRenderer.sprite = m_fontSpriteList[4];
+        yield return new WaitForSeconds(1.0f);
+        m_resultNumberScore.Play(m_totalScore);
+        yield return new WaitForSeconds(1.0f);
+        m_resultNumberBonus.Play(bonusMul);
+        yield return new WaitForSeconds(1.0f);
+        m_resultNumberTotal.Play(m_totalScore * bonusMul);
+        yield return new WaitForSeconds(4.0f);
         UIGame.Instance.FadeOut();
         yield return new WaitForSeconds(1.0f);
         GameManager.Instance.NextStage();
+    }
+
+    private void CreateResult()
+    {
+        GameObject obj = GameObject.Instantiate(m_resultNumberPrefab, m_resultScoreRoot);
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        obj.transform.localScale = Vector3.one;
+        m_resultNumberScore = obj.GetComponent<NumberManager>();
+
+        obj = GameObject.Instantiate(m_resultNumberPrefab, m_resultBonusRoot);
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        obj.transform.localScale = Vector3.one;
+        m_resultNumberBonus = obj.GetComponent<NumberManager>();
+
+        obj = GameObject.Instantiate(m_resultNumberPrefab, m_resultTotalRoot);
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        obj.transform.localScale = Vector3.one;
+        m_resultNumberTotal = obj.GetComponent<NumberManager>();
     }
 
     private void GameStart()
@@ -119,6 +177,7 @@ public class StageController : MonoBehaviour
         int prevCounter = m_tempoManager.TanCounter;
         this.UpdateAsObservable().Where(a => m_tempoManager.TanCounter > prevCounter).Subscribe(b =>
         {
+            GameManager.Instance.Count.Play(m_tempoManager.TanCounter);
             if (m_notesManager.Opening() || m_notesManager.IsOpen())
             {
                 PlayNotes();

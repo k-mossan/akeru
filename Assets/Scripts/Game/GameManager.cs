@@ -29,16 +29,24 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     [SerializeField]
     private Transform m_totalScoreRoot = null;
 
+    [SerializeField]
+    private GameObject m_countPrefab = null;
+
+    [SerializeField]
+    private Transform m_countRoot = null;
+
     private PlayerController m_player = null;
     private StageController m_stage = null;
     private NumberManager m_score = null;
     private NumberManager m_totalScore = null;
+    private NumberManager m_count = null;
     private static int m_stageNo = 0;
 
     public PlayerController Player => m_player;
     public StageController Stage => m_stage;
     public NumberManager Score => m_score;
     public NumberManager TotalScore => m_totalScore;
+    public NumberManager Count => m_count;
 
     // Start is called before the first frame update
     void Start()
@@ -64,6 +72,11 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
         obj.transform.localScale = Vector3.one;
         m_totalScore = obj.GetComponent<NumberManager>();
+        obj = GameObject.Instantiate(m_countPrefab, m_countRoot);
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        obj.transform.localScale = Vector3.one;
+        m_count = obj.GetComponent<NumberManager>();
     }
 
     // Update is called once per frame
