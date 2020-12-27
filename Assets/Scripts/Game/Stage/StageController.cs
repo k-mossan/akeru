@@ -129,7 +129,7 @@ public class StageController : MonoBehaviour
         int turnNum = m_tempoManager.TanCounter - m_turnMax;
         turnNum = turnNum > m_turnMax ? m_turnMax : turnNum;
         float bonusRate = 1.0f - (float)turnNum / (float)m_turnMax;
-        int bonusMul = (int)(bonusRate * 10.0f * 100.0f);
+        int bonusMul = (int)(bonusRate * 9.0f) + 1;
         yield return null;
         m_tempoManager.SetPause(true);
         yield return new WaitForSeconds(1.0f);
@@ -140,7 +140,7 @@ public class StageController : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         m_resultNumberScore.Play(m_totalScore);
         yield return new WaitForSeconds(1.0f);
-        m_resultNumberBonus.Play(bonusMul);
+        m_resultNumberBonus.Play(bonusMul * 100);
         yield return new WaitForSeconds(1.0f);
         m_resultNumberTotal.Play(m_totalScore * bonusMul);
         yield return new WaitForSeconds(4.0f);
